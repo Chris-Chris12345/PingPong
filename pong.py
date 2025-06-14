@@ -1,6 +1,6 @@
 from tkinter import *
 import random
-import math
+import time
 from tkinter import messagebox
 
 root = Tk()
@@ -20,14 +20,18 @@ root.update()
 
 #initializing the class ball
 class Ball:
-    def __init__(self, canvas, paddle1, paddle2, color):
+    def update(self):
+        text.configure(text=str(self.score1) + ":" + str(self.score2))
 
-        #creating the ball in the center
-        self.id = canvas.create_oval(10,10,100,100,fill=color)
-        self.canvas.move(self.id,350,250)
+    def __init__(self, canvas, paddle1, paddle2, color):
         self.paddle1 = paddle1
         self.paddle2 = paddle2
         self.canvas = canvas
+
+        #creating the ball in the center
+        self.id = canvas.create_oval(10,10,30,30,fill=color)
+        self.canvas.move(self.id,350,250)
+       
 
         #Ball velocity, randomized
         starts = [-3,-2,-1,1,2,3]
@@ -54,14 +58,14 @@ class Ball:
             self.score1 += 1
             print(self.score1)
 
-            canvas.itemconfigure(l,text=str(self.score1) + ":" + str(self.score2))
+            canvas.itemconfigure(text,text=str(self.score1) + ":" + str(self.score2))
 
         if pos[2] >= self.canvas_width:
             self.x = -4
             self.score2 += 1
             print(self.score2)
 
-            canvas.itemconfigure(l,text=str(self.score1) + ":" + str(self.score2))
+            canvas.itemconfigure(text,text=str(self.score1) + ":" + str(self.score2))
 
         if self.hit_paddle1(pos) == True:
             self.x = 4
@@ -92,8 +96,8 @@ class Paddle1:
         self.canvas = canvas
         self.id = canvas.create_rectangle(10,150,25,250,fill=color)
         self.y = 0
-        self.canvas_height = self.canvas.winfo_height
-        self.canvas_width = self.canvas.winfo_width
+        self.canvas_height = self.canvas.winfo_height()
+        self.canvas_width = self.canvas.winfo_width()
 
         #bind keys (key events)
         self.canvas.bind_all("a",self.turn_up)
@@ -124,6 +128,43 @@ class Paddle2:
         self.canvas = canvas
         self.id = canvas.create_rectangle(675,150,690,250,fill=color)
         self.y = 0
+        self.canvas_height = self.canvas.winfo_height()
+        self.canvas_width = self.canvas.winfo_width()
 
+        self.canvas.bind_all("<KeyPress-Left>",self.turn_up)
+        self.canvas.bind_all("<KeyPress-Right>",self.turn_down)
+
+    def draw(self):
+        self.canvas.move(self.id,0,self.y)
+        pos = self.canvas.coords(self.id)
+
+        if pos[1] <= 0:
+            self.y = 0
+
+        if pos[3] >= self.canvas_height:
+            self.y = 0
+
+    def turn_up(self,event):
+        self.y = -4
+    
+    def turn_down(self,event):
+        self.y = 4
+
+middle_circle = canvas.create_oval(10,10,200,200,outline="white")
+canvas.move(middle_circle,245,145)
+paddle1 = Paddle1(canvas,"red")
+paddle2 = Paddle2(canvas,"blue")
+ball =Ball(canvas,paddle1,paddle2,"green")
+
+while 1:
+    if ball.score1 == 10 or ball.score2 == 10:
+        messagebox.showinfo("Game Over", "Player 1: "+ str(ball.score1) + ",   Player 2: "+ str(ball.score2))
+        break
+    paddle1.draw()
+    paddle2.draw()
+    ball.draw()
+    root.update_idletasks()
+    root.update()
+    time.sleep(0.01)
 
 root.mainloop()
